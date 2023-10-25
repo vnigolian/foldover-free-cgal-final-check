@@ -6,6 +6,11 @@
 
 #include <ultimaille/all.h>
 
+#include <CGAL/Tetrahedron_3.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+
+
+
 using namespace UM;
 
 inline double chi(double eps, double det) {
@@ -183,6 +188,67 @@ struct Untangle3D {
     int ninverted; // number of inverted tetrahedra
 };
 
+
+
+//---------------------------------------------------------------------------------- CGAL stuff
+using CGAL_Kernel      = CGAL::Exact_predicates_inexact_constructions_kernel;
+using CGAL_Point3      = CGAL::Point_3<CGAL_Kernel>;
+using CGAL_Tetrahedron = CGAL::Tetrahedron_3<CGAL_Kernel>;
+
+CGAL_Point3 to_cgal(const vec3 p){
+    return {p.x, p.y, p.z};
+}
+
+bool check_validity_with_cgal(const Tetrahedra& mesh){
+
+    int neg_count(0);
+    int deg_count(0);
+    int pos_count(0);
+
+    double um_volume(0);
+    double cgal_volume(0);
+
+    for (int t : cell_iter(mesh)) {
+        um_volume += mesh.util.cell_volume(t);
+
+        auto v0 = mesh.points[mesh.vert(t, 0)];
+        auto v1 = mesh.points[mesh.vert(t, 1)];
+        auto v2 = mesh.points[mesh.vert(t, 2)];
+        auto v3 = mesh.points[mesh.vert(t, 3)];
+
+        CGAL_Tetrahedron cgal_tet(to_cgal(v0),
+                                  to_cgal(v1),
+                                  to_cgal(v2),
+                                  to_cgal(v3));
+
+        cgal_volume += cgal_tet.volume();
+
+        auto orientation = cgal_tet.orientation();
+        neg_count += orientation == CGAL::NEGATIVE;
+        deg_count += orientation == CGAL::ZERO;
+        pos_count += orientation == CGAL::POSITIVE;
+
+        /*m.points[m.vert(t, 1)] - m.points[m.vert(t, 0)],
+         m.points[m.vert(t, 2)] - m.points[m.vert(t, 0)],
+         m.points[m.vert(t, 3)] - m.points[m.vert(t, 0)]*/
+
+    }
+
+    std::cout<<" - check: mesh volume from ultimaille = "<<um_volume<<std::endl;
+    std::cout<<" - check: mesh volume from       CGAL = "<<cgal_volume<<std::endl;
+
+    std::cout<<" -     flipped count: "<<neg_count<<std::endl;
+    std::cout<<" -  degenerate count: "<<deg_count<<std::endl;
+    std::cout<<" - non-flipped count: "<<pos_count<<std::endl;
+
+
+
+    return !neg_count;
+}
+
+//---------------------------------------------------------------------------- end of CGAL stuff
+
+
 int main(int argc, char** argv) {
     if (3>argc) {
         std::cerr << "Usage: " << argv[0] << " init.mesh reference.mesh [result.mesh]" << std::endl;
@@ -273,6 +339,7 @@ int main(int argc, char** argv) {
         for (int c : cell_iter(ref)) {
             ref_volume += ref.util.cell_volume(c);
             ini_volume += ini.util.cell_volume(c);
+
         }
 
         if (
@@ -333,11 +400,24 @@ int main(int argc, char** argv) {
             p = (p - vec3(1,1,1)*boxsize/2)/boxsize*maxside + (bbmax+bbmin)/2.;
     }
 
-    if (inverted)
+    auto cgal_valid = check_validity_with_cgal(ref);
+    if(cgal_valid){
+        std::cout<<" SUCCESS CONFIRMED WITH CGAL"<<std::endl;
+    }else{
+        std::cout<<" FAILED TO OBTAIN CGAL-VALID MESH"<<std::endl;
+    }
+
+
+
+    /*if (inverted)
         for (vec3 &p : ref.points)
-            p.x *= -1;
+            p.x *= -1;*/
 
     write_by_extension(res_filename, ref, VolumeAttributes{ { {"selection", opt.lock.ptr} }, { {"det", opt.det.ptr} }, {}, {} });
-    return 0;
+
+
+
+
+    return !cgal_valid;
 }
 

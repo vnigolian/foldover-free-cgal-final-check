@@ -21,6 +21,8 @@ add_subdirectory(ultimaille)
 include_directories(ultimaille)
 include_directories(ultimaille/ext)
 
+find_package(CGAL REQUIRED)
+
 if (MSVC)
     # warning level 4
     add_compile_options(/W4)
@@ -33,5 +35,5 @@ add_executable(untangle2d untangle2d.cpp)
 target_link_libraries(untangle2d ultimaille)
 
 add_executable(untangle3d untangle3d.cpp)
-target_link_libraries(untangle3d ultimaille)
+target_link_libraries(untangle3d ultimaille  CGAL::CGAL)
 
