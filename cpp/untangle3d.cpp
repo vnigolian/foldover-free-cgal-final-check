@@ -243,7 +243,7 @@ bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_fil
     std::cout<<" - non-flipped count: "<<pos_count<<std::endl;
 
     std::ofstream outfile(res_filename + ".res");
-    outfile<<neg_count<<std::endl<<deg_count<<std::endl<<pos_count;
+    outfile<<neg_count<<std::endl<<deg_count<<std::endl<<pos_count<<std::endl;
     outfile.close();
 
 
