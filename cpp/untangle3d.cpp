@@ -263,53 +263,47 @@ bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_fil
     std::cout<<" -  degenerate count: "<<deg_count<<std::endl;
     std::cout<<" - non-flipped count: "<<pos_count<<std::endl;
 
-    std::ofstream outfile(res_filename + ".res");
-    outfile<<neg_count<<std::endl<<deg_count<<std::endl<<pos_count<<std::endl;
-    outfile.close();
-
-
-
     std::string filename, super_directory, directory;
 
     if(!extract_mesh_name_and_directory(res_filename,
                                         filename,
                                         directory)){
             std::cout<<" ERROR - couldn't extract filename and location"<<std::endl;
-            return -1;
+    }else{
+        if(!extract_mesh_name_and_directory(directory,
+                                            filename,
+                                            super_directory)){
+            std::cout<<" ERROR - couldn't extract super filename and location"<<std::endl;
+        }else{
+
+
+            std::string output_path = directory+"/FOF_stats.txt";
+            std::cout<<" -> writing stats to "<<output_path<<std::endl;
+
+            std::ofstream output_file(output_path);
+            if(!output_file.is_open()){
+                std::cout<<" ERROR - couldn't open stat file "<<output_path<<std::endl;
+                return -1;
+            }
+
+            std::cout<<" res_filename: "<<res_filename<<std::endl;
+            std::cout<<" filename: "<<filename<<std::endl;
+            std::cout<<" directory: "<<directory<<std::endl;
+            std::cout<<" super_directory: "<<super_directory<<std::endl;
+
+            int nedges(0);
+            output_file<<filename<<std::endl;
+            output_file<<mesh.nverts()<<std::endl;
+            output_file<<nedges<<std::endl;
+            output_file<<mesh.nfacets()<<std::endl;
+            output_file<<mesh.ncells()<<std::endl;
+            output_file<<deg_count<<std::endl;
+            output_file<<deg_count<<std::endl;
+            output_file<<0<<std::endl;
+
+            output_file.close();
+        }
     }
-    if(!extract_mesh_name_and_directory(directory,
-                                        filename,
-                                        super_directory)){
-        std::cout<<" ERROR - couldn't extract super filename and location"<<std::endl;
-        return -1;
-    }
-
-
-    std::string output_path = directory+"/FOF_stats.txt";
-    std::cout<<" -> writing stats to "<<output_path<<std::endl;
-
-    std::ofstream output_file(output_path);
-    if(!output_file.is_open()){
-        std::cout<<" ERROR - couldn't open stat file "<<output_path<<std::endl;
-        return -1;
-    }
-
-    std::cout<<" res_filename: "<<res_filename<<std::endl;
-    std::cout<<" filename: "<<filename<<std::endl;
-    std::cout<<" directory: "<<directory<<std::endl;
-    std::cout<<" super_directory: "<<super_directory<<std::endl;
-
-    int nedges(0);
-    output_file<<filename<<std::endl;
-    output_file<<mesh.nverts()<<std::endl;
-    output_file<<nedges<<std::endl;
-    output_file<<mesh.nfacets()<<std::endl;
-    output_file<<mesh.ncells()<<std::endl;
-    output_file<<deg_count<<std::endl;
-    output_file<<deg_count<<std::endl;
-    output_file<<0<<std::endl;
-
-    output_file.close();
 
     return !neg_count;
 }
