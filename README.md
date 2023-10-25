@@ -1,3 +1,9 @@
+# NOTICE
+This is a fork of the project below. 
+My changes are only about using CGAL's exact predicates to test the validity of the meshes obtained with the "Foldover-Free" method (below).
+Make sure to check the original project.
+
+
 # How to compute locally invertible maps
 
 This repository contains source code and slides shown during MIT Vision and Graphics Seminar (March 2, 2021)
