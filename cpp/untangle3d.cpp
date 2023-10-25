@@ -199,7 +199,7 @@ CGAL_Point3 to_cgal(const vec3 p){
     return {p.x, p.y, p.z};
 }
 
-bool check_validity_with_cgal(const Tetrahedra& mesh){
+bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_filename){
 
     int neg_count(0);
     int deg_count(0);
@@ -240,6 +240,10 @@ bool check_validity_with_cgal(const Tetrahedra& mesh){
     std::cout<<" -     flipped count: "<<neg_count<<std::endl;
     std::cout<<" -  degenerate count: "<<deg_count<<std::endl;
     std::cout<<" - non-flipped count: "<<pos_count<<std::endl;
+
+    std::ofstream outfile(res_filename + ".res");
+    outfile<<neg_count<<std::endl<<deg_count<<std::endl<<pos_count;
+    outfile.close();
 
 
 
@@ -400,7 +404,7 @@ int main(int argc, char** argv) {
             p = (p - vec3(1,1,1)*boxsize/2)/boxsize*maxside + (bbmax+bbmin)/2.;
     }
 
-    auto cgal_valid = check_validity_with_cgal(ref);
+    auto cgal_valid = check_validity_with_cgal(ref, res_filename);
     if(cgal_valid){
         std::cout<<" SUCCESS CONFIRMED WITH CGAL"<<std::endl;
     }else{
