@@ -200,6 +200,27 @@ CGAL_Point3 to_cgal(const vec3 p){
     return {p.x, p.y, p.z};
 }
 
+
+
+bool extract_mesh_name_and_directory(std::string location,
+                                     std::string& filename,
+                                     std::string& directory){
+
+    char sep1 = '/';
+
+    size_t directory_end_index = location.rfind(sep1, location.length());
+
+    if (directory_end_index != std::string::npos) {
+        //-4 to get rid of extension
+        filename = location.substr(directory_end_index+1, location.length()-directory_end_index-5);
+        directory = location.substr(0, directory_end_index);
+
+        return true;
+    }
+
+    return false;
+}
+
 bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_filename){
 
     int neg_count(0);
@@ -247,6 +268,48 @@ bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_fil
     outfile.close();
 
 
+
+    std::string filename, super_directory, directory;
+
+    if(!extract_mesh_name_and_directory(res_filename,
+                                        filename,
+                                        directory)){
+            std::cout<<" ERROR - couldn't extract filename and location"<<std::endl;
+            return -1;
+    }
+    if(!extract_mesh_name_and_directory(directory,
+                                        filename,
+                                        super_directory)){
+        std::cout<<" ERROR - couldn't extract super filename and location"<<std::endl;
+        return -1;
+    }
+
+
+    std::string output_path = directory+"/FOF_stats.txt";
+    std::cout<<" -> writing stats to "<<output_path<<std::endl;
+
+    std::ofstream output_file(output_path);
+    if(!output_file.is_open()){
+        std::cout<<" ERROR - couldn't open stat file "<<output_path<<std::endl;
+        return -1;
+    }
+
+    std::cout<<" res_filename: "<<res_filename<<std::endl;
+    std::cout<<" filename: "<<filename<<std::endl;
+    std::cout<<" directory: "<<directory<<std::endl;
+    std::cout<<" super_directory: "<<super_directory<<std::endl;
+
+    int nedges(0);
+    output_file<<filename<<std::endl;
+    output_file<<mesh.nverts()<<std::endl;
+    output_file<<nedges<<std::endl;
+    output_file<<mesh.nfacets()<<std::endl;
+    output_file<<mesh.ncells()<<std::endl;
+    output_file<<deg_count<<std::endl;
+    output_file<<deg_count<<std::endl;
+    output_file<<0<<std::endl;
+
+    output_file.close();
 
     return !neg_count;
 }
