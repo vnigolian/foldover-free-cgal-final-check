@@ -298,7 +298,7 @@ bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_fil
             output_file<<mesh.nfacets()<<std::endl;
             output_file<<mesh.ncells()<<std::endl;
             output_file<<deg_count<<std::endl;
-            output_file<<deg_count<<std::endl;
+            output_file<<neg_count<<std::endl;
             output_file<<0<<std::endl;
 
             output_file.close();
