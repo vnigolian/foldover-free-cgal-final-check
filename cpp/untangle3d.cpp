@@ -434,6 +434,13 @@ int main(int argc, char** argv) {
             p = (p - (bbmax+bbmin)/2.)*boxsize/maxside + vec3(1,1,1)*boxsize/2;
     }
 
+
+    auto cgal_ini_valid = check_validity_with_cgal(ini, "");
+    auto cgal_ref_valid = check_validity_with_cgal(ref, "");
+    std::cout<<"   initial mesh valid per CGAL: "<<cgal_ini_valid<<std::endl;
+    std::cout<<" reference mesh valid per CGAL: "<<cgal_ref_valid<<std::endl;
+
+
     Untangle3D opt(ref);
 
     for (int v : vert_iter(ref))
