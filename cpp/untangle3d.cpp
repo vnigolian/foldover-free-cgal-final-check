@@ -256,6 +256,11 @@ bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_fil
 
     }
 
+
+    /*for(int i(0); i<mesh.points.size(); i++){
+        std::cout<<" - "<<i<<" at "<<std::setprecision(64)<<mesh.points[i]<<std::endl;
+    }*/
+
     std::cout<<" - check: mesh volume from ultimaille = "<<um_volume<<std::endl;
     std::cout<<" - check: mesh volume from       CGAL = "<<cgal_volume<<std::endl;
 
@@ -436,10 +441,12 @@ int main(int argc, char** argv) {
 
 
     auto cgal_ini_valid = check_validity_with_cgal(ini, "");
-    auto cgal_ref_valid = check_validity_with_cgal(ref, "");
+    //auto cgal_ref_valid = check_validity_with_cgal(ref, "");
     std::cout<<"   initial mesh valid per CGAL: "<<cgal_ini_valid<<std::endl;
-    std::cout<<" reference mesh valid per CGAL: "<<cgal_ref_valid<<std::endl;
+    //std::cout<<" reference mesh valid per CGAL: "<<cgal_ref_valid<<std::endl;
 
+    //std::cout<<" stopping here for now"<<std::endl;
+    //exit(EXIT_FAILURE);
 
     Untangle3D opt(ref);
 
