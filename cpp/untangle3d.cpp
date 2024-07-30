@@ -479,6 +479,7 @@ int main(int argc, char** argv) {
     auto cgal_valid = check_validity_with_cgal(ref, res_filename);
     if(cgal_valid){
         std::cout<<" SUCCESS CONFIRMED WITH CGAL"<<std::endl;
+        write_by_extension(res_filename, ref, VolumeAttributes{ { {"selection", opt.lock.ptr} }, { {"det", opt.det.ptr} }, {}, {} });
     }else{
         std::cout<<" FAILED TO OBTAIN CGAL-VALID MESH"<<std::endl;
     }
@@ -488,9 +489,6 @@ int main(int argc, char** argv) {
     /*if (inverted)
         for (vec3 &p : ref.points)
             p.x *= -1;*/
-
-    write_by_extension(res_filename, ref, VolumeAttributes{ { {"selection", opt.lock.ptr} }, { {"det", opt.det.ptr} }, {}, {} });
-
 
 
 
