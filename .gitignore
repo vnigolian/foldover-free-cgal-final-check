@@ -1,3 +1,4 @@
 */build/*
 *.user
 */cpp/build-ninja/*
+cpp/build-ninja/*
