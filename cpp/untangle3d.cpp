@@ -221,6 +221,43 @@ bool extract_mesh_name_and_directory(std::string location,
     return false;
 }
 
+void compute_volume(Tetrahedra& mesh, double& um_vol, double& cgal_vol){
+    um_vol = 0;
+    cgal_vol = 0;
+    for (int t : cell_iter(mesh)) {
+        um_vol += mesh.util.cell_volume(t);
+
+        auto v0 = mesh.points[mesh.vert(t, 0)];
+        auto v1 = mesh.points[mesh.vert(t, 1)];
+        auto v2 = mesh.points[mesh.vert(t, 2)];
+        auto v3 = mesh.points[mesh.vert(t, 3)];
+
+        CGAL_Tetrahedron cgal_tet(to_cgal(v0),
+                                  to_cgal(v1),
+                                  to_cgal(v2),
+                                  to_cgal(v3));
+
+        cgal_vol += cgal_tet.volume();
+    }
+}
+
+
+void scale_to_volume(Tetrahedra& mesh, double vol = 1.0){
+    double um_vol, cgal_vol(0);
+    compute_volume(mesh, um_vol, cgal_vol);
+
+
+    std::cout<<" - initial volume = "<<cgal_vol<<std::endl;
+
+
+    for (vec3 &p : mesh.points)
+        p = p * std::pow(vol / cgal_vol,  1./3.);
+
+    compute_volume(mesh, um_vol, cgal_vol);
+    std::cout<<" - scaled volume = "<<cgal_vol<<std::endl;
+}
+
+
 bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_filename){
 
     int neg_count(0);
@@ -439,11 +476,16 @@ int main(int argc, char** argv) {
             p = (p - (bbmax+bbmin)/2.)*boxsize/maxside + vec3(1,1,1)*boxsize/2;
     }
 
+    double um_vol, cgal_vol;
+    //compute_volume(ref, um_vol, cgal_vol);
+    scale_to_volume(ini, 1.0);
+    scale_to_volume(ref, 1.0);
+
 
     auto cgal_ini_valid = check_validity_with_cgal(ini, "");
-    //auto cgal_ref_valid = check_validity_with_cgal(ref, "");
+    auto cgal_ref_valid = check_validity_with_cgal(ref, "");
     std::cout<<"   initial mesh valid per CGAL: "<<cgal_ini_valid<<std::endl;
-    //std::cout<<" reference mesh valid per CGAL: "<<cgal_ref_valid<<std::endl;
+    std::cout<<" reference mesh valid per CGAL: "<<cgal_ref_valid<<std::endl;
 
     //std::cout<<" stopping here for now"<<std::endl;
     //exit(EXIT_FAILURE);
