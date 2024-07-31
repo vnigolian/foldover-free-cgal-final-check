@@ -3,3 +3,4 @@
 */cpp/build-ninja/*
 cpp/build-ninja/*
 cpp/cmake-build*
+cpp/.idea/*
