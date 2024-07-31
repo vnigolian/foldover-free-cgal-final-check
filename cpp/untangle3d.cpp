@@ -347,7 +347,7 @@ bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_fil
         }
     }
 
-    return !neg_count;
+    return !neg_count && !deg_count;
 }
 
 //---------------------------------------------------------------------------- end of CGAL stuff
