@@ -319,7 +319,7 @@ bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_fil
         }else{
 
 
-            std::string output_path = directory+"/FOF_stats.txt";
+            std::string output_path = directory+"/"+filename+"_FOF_stats.txt";
             std::cout<<" -> writing stats to "<<output_path<<std::endl;
 
             std::ofstream output_file(output_path);
