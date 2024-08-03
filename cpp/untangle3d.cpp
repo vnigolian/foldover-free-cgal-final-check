@@ -492,13 +492,14 @@ int main(int argc, char** argv) {
 
     Untangle3D opt(ref);
 
-    for (int v : vert_iter(ref))
+    for (int v : vert_iter(ref)){
         for (int d : range(3)){
             opt.X[3*v+d] = ini.points[v][d];
-            if(!v){
-                std::cout<<" - codomain v0: "<<opt.X[0]<<" "<<opt.X[1]<<" "<<opt.X[2]<<" "<<std::endl;
-            }
         }
+        if(!v){
+            std::cout<<" - codomain v0: "<<opt.X[0]<<" "<<opt.X[1]<<" "<<opt.X[2]<<" "<<std::endl;
+        }
+    }
 
     opt.lock_boundary_verts();
 
