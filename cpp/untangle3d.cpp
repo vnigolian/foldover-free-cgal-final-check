@@ -517,11 +517,11 @@ int main(int argc, char** argv) {
         for (int d : range(3))
             ref.points[v][d] = opt.X[3*v+d];
 
-    { // restore scale
+    /*{ // restore scale
         double maxside = std::max(bbmax.x-bbmin.x, bbmax.y-bbmin.y);
         for (vec3 &p : ref.points)
             p = (p - vec3(1,1,1)*boxsize/2)/boxsize*maxside + (bbmax+bbmin)/2.;
-    }
+    }*/
 
     auto cgal_valid = check_validity_with_cgal(ref, res_filename);
     if(cgal_valid){
