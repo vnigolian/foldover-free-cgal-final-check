@@ -167,7 +167,7 @@ struct Untangle3D {
 
     // optimization input parameters
     Tetrahedra &m;          // the mesh to optimize
-    double theta = 0.999;//1./2.;   // the energy is (1-theta)*(shape energy) + theta*(area energy)
+    double theta = 1./2.;   // the energy is (1-theta)*(shape energy) + theta*(area energy)
     int maxiter = 10000;    // max number of outer iterations
     int bfgs_maxiter = 3000; // max number of inner iterations
     double bfgs_threshold = 1e-4;
@@ -467,19 +467,19 @@ int main(int argc, char** argv) {
     vec3 bbmin, bbmax; // these are used to undo the scaling we apply to the model
     const double boxsize = 10.;
 
-    { // scale
+    /*{ // scale
         ref.points.util.bbox(bbmin, bbmax);
         double maxside = std::max(bbmax.x-bbmin.x, bbmax.y-bbmin.y);
         for (vec3 &p : ref.points)
             p = (p - (bbmax+bbmin)/2.)*boxsize/maxside + vec3(1,1,1)*boxsize/2;
         for (vec3 &p : ini.points)
             p = (p - (bbmax+bbmin)/2.)*boxsize/maxside + vec3(1,1,1)*boxsize/2;
-    }
+    }*/
 
     double um_vol, cgal_vol;
     //compute_volume(ref, um_vol, cgal_vol);
-    scale_to_volume(ini, 1.0);
-    scale_to_volume(ref, 1.0);
+    //scale_to_volume(ini, 1.0);
+    //scale_to_volume(ref, 1.0);
 
 
     auto cgal_ini_valid = check_validity_with_cgal(ini, "");
