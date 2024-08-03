@@ -167,7 +167,7 @@ struct Untangle3D {
 
     // optimization input parameters
     Tetrahedra &m;          // the mesh to optimize
-    double theta = 1./2.;   // the energy is (1-theta)*(shape energy) + theta*(area energy)
+    double theta = 0.999;//1./2.;   // the energy is (1-theta)*(shape energy) + theta*(area energy)
     int maxiter = 10000;    // max number of outer iterations
     int bfgs_maxiter = 3000; // max number of inner iterations
     double bfgs_threshold = 1e-4;
