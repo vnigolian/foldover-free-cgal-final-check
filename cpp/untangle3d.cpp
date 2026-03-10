@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cstring>
 #include <chrono>
+#include <string>
+#include <filesystem>
 
 #include <ultimaille/all.h>
 
@@ -257,8 +259,21 @@ void scale_to_volume(Tetrahedra& mesh, double vol = 1.0){
     std::cout<<" - scaled volume = "<<cgal_vol<<std::endl;
 }
 
+std::string extract_name(const std::string& filepath, const std::string& suffix) {
+    // Get just the filename from the full path
+    std::string filename = std::filesystem::path(filepath).filename().string();
 
-bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_filename){
+    // Strip the suffix if it exists at the end
+    if (filename.size() >= suffix.size() &&
+        filename.compare(filename.size() - suffix.size(), suffix.size(), suffix) == 0) {
+        return filename.substr(0, filename.size() - suffix.size());
+        }
+
+    // Return filename as-is if suffix not found
+    return filename;
+}
+
+bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& stats_filepath){
 
     int neg_count(0);
     int deg_count(0);
@@ -286,11 +301,6 @@ bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_fil
         neg_count += orientation == CGAL::NEGATIVE;
         deg_count += orientation == CGAL::ZERO;
         pos_count += orientation == CGAL::POSITIVE;
-
-        /*m.points[m.vert(t, 1)] - m.points[m.vert(t, 0)],
-         m.points[m.vert(t, 2)] - m.points[m.vert(t, 0)],
-         m.points[m.vert(t, 3)] - m.points[m.vert(t, 0)]*/
-
     }
 
 
@@ -303,48 +313,36 @@ bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_fil
 
     std::cout<<" -     flipped count: "<<neg_count<<std::endl;
     std::cout<<" -  degenerate count: "<<deg_count<<std::endl;
-    std::cout<<" - non-flipped count: "<<pos_count<<std::endl;
-
-    std::string filename, super_directory, directory;
-
-    if(!extract_mesh_name_and_directory(res_filename,
-                                        filename,
-                                        directory)){
-            std::cout<<" ERROR - couldn't extract filename and location"<<std::endl;
-    }else{
-        if(!extract_mesh_name_and_directory(directory,
-                                            filename,
-                                            super_directory)){
-            std::cout<<" ERROR - couldn't extract super filename and location"<<std::endl;
-        }else{
+    std::cout<< " - non-flipped count: " << pos_count << std::endl;
 
 
-            std::string output_path = directory+"/"+filename+"_FOF_stats.txt";
-            std::cout<<" -> writing stats to "<<output_path<<std::endl;
+    if (stats_filepath != "") {
+        std::string output_path = stats_filepath;
+        std::cout << " -> writing stats to " << output_path << std::endl;
 
-            std::ofstream output_file(output_path);
-            if(!output_file.is_open()){
-                std::cout<<" ERROR - couldn't open stat file "<<output_path<<std::endl;
-                return -1;
-            }
-
-            std::cout<<" res_filename: "<<res_filename<<std::endl;
-            std::cout<<" filename: "<<filename<<std::endl;
-            std::cout<<" directory: "<<directory<<std::endl;
-            std::cout<<" super_directory: "<<super_directory<<std::endl;
-
-            int nedges(0);
-            output_file<<filename<<std::endl;
-            output_file<<mesh.nverts()<<std::endl;
-            output_file<<nedges<<std::endl;
-            output_file<<mesh.nfacets()<<std::endl;
-            output_file<<mesh.ncells()<<std::endl;
-            output_file<<deg_count<<std::endl;
-            output_file<<neg_count<<std::endl;
-            output_file<<0<<std::endl;
-
-            output_file.close();
+        std::ofstream output_file(output_path);
+        if (!output_file.is_open()) {
+            std::cout << " ERROR - couldn't open stat file " << output_path << std::endl;
+            return -1;
         }
+
+        std::string suffix = "_FOF_stats.txt";
+        std::string name = extract_name(stats_filepath, suffix);
+
+        std::cout << " suffix: " << suffix << std::endl;
+        std::cout << " name: " << name << std::endl;
+
+        int nedges(0);
+        output_file << name << std::endl;
+        output_file << mesh.nverts() << std::endl;
+        output_file << nedges << std::endl;
+        output_file << mesh.nfacets() << std::endl;
+        output_file << mesh.ncells() << std::endl;
+        output_file << deg_count << std::endl;
+        output_file << neg_count << std::endl;
+        output_file << 0 << std::endl;
+
+        output_file.close();
     }
 
     return !neg_count && !deg_count;
@@ -355,7 +353,7 @@ bool check_validity_with_cgal(const Tetrahedra& mesh, const std::string& res_fil
 
 int main(int argc, char** argv) {
     if (3>argc) {
-        std::cerr << "Usage: " << argv[0] << " init.mesh reference.mesh [result.mesh]" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " init.mesh reference.mesh [result.mesh] [FOF_stats.txt]" << std::endl;
         return 1;
     }
 
@@ -364,9 +362,15 @@ int main(int argc, char** argv) {
         res_filename = std::string(argv[3]);
     }
 
+    std::string stats_filepath = "FOF_stats.txt";
+    if (5<=argc) {
+        stats_filepath = std::string(argv[4]);
+    }
+
     Tetrahedra ini, ref;
     read_by_extension(argv[1], ini);
     read_by_extension(argv[2], ref);
+
     std::cerr << "Untangling " << argv[1] << "," << ini.nverts() << "," << std::endl;
 
     if (ini.nverts()!=ref.nverts() || ini.ncells()!=ref.ncells()) {
@@ -523,15 +527,14 @@ int main(int argc, char** argv) {
             p = (p - vec3(1,1,1)*boxsize/2)/boxsize*maxside + (bbmax+bbmin)/2.;
     }*/
 
-    auto cgal_valid = check_validity_with_cgal(ref, res_filename);
+    auto cgal_valid = check_validity_with_cgal(ref, stats_filepath);
     if(cgal_valid){
         std::cout<<" SUCCESS CONFIRMED WITH CGAL"<<std::endl;
         write_by_extension(res_filename, ref, VolumeAttributes{ { {"selection", opt.lock.ptr} }, { {"det", opt.det.ptr} }, {}, {} });
     }else{
         std::cout<<" FAILED TO OBTAIN CGAL-VALID MESH"<<std::endl;
     }
-
-
+    
 
     /*if (inverted)
         for (vec3 &p : ref.points)
